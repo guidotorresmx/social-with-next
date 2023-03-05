@@ -8,8 +8,10 @@
   --color-green: #3bdf72;
   --color-gray: #b5bdc4;
 }
+
 html,
 body {
+  scroll-behavior: smooth;
   padding: 0;
   margin: 0;
   font-family: 'Noto Sans', sans-serif;
