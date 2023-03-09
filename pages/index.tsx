@@ -13,7 +13,6 @@ export default function Home() {
         pathname: '/[username]',
         query: {username: 'guidotorresmx'}
       }}>
-        guidotorresmx's profile
       </Link>
     </div>
   )

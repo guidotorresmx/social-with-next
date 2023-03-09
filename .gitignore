@@ -163,3 +163,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+firebase.ts
+firebase.tsx
+firebase.js
