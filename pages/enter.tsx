@@ -1,7 +1,7 @@
-import { auth, firestore, googleAuthProvider } from '../lib/firebase';
-import { useContext, useState, useEffect, useCallback } from 'react';
-import { UserContext } from '../lib/context';
-import debounce from 'lodash.debounce';
+import { auth, firestore, googleAuthProvider } from "../lib/firebase";
+import { useContext, useState, useEffect, useCallback } from "react";
+import { UserContext } from "../lib/context";
+import debounce from "lodash.debounce";
 
 export default function Enter(props) {
   const { user, username } = useContext(UserContext);
@@ -11,11 +11,15 @@ export default function Enter(props) {
   // 3. user signed in, has username <SignOutButton />
   return (
     <main>
-      {user ? 
-        !username ? <UsernameForm /> : <SignOutButton /> 
-        : 
+      {user ? (
+        !username ? (
+          <UsernameForm />
+        ) : (
+          <SignOutButton />
+        )
+      ) : (
         <SignInButton />
-      }
+      )}
     </main>
   );
 }
@@ -29,7 +33,7 @@ function SignInButton() {
   return (
     <>
       <button className="btn-google" onClick={signInWithGoogle}>
-        <img src={'/google.png'} /> Sign in with Google
+        <img src={"/google.png"} /> Sign in with Google
       </button>
       <button onClick={() => auth.signInAnonymously()}>
         Sign in Anonymously
@@ -40,39 +44,54 @@ function SignInButton() {
 
 // Sign out button
 function SignOutButton() {
-  return <button onClick={() => {alert("sign out"); auth.signOut()}}>Sign Out</button>;
+  return (
+    <button
+      onClick={() => {
+        alert("sign out");
+        auth.signOut();
+      }}
+    >
+      Sign Out
+    </button>
+  );
 }
 
 function UsernameForm() {
-  const [formValue, setFormValue] = useState('');
+  const [formValue, setFormValue] = useState("");
   const [isValid, setIsValid] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const {user, username} = useContext(UserContext);
+  const { user, username } = useContext(UserContext);
 
   const onSubmit = async (e) => {
-    e.preventDefault();
-    const userDoc = firestore.doc(`users/${user.uid}`);
-    const usernameDoc = firestore.doc(`usernames/${formValue}`);
+    try {
+      e.preventDefault();
+      const userDoc = firestore.doc(`users/${user.uid}`);
+      const usernameDoc = firestore.doc(`usernames/${formValue}`);
 
-    const batch = firestore.batch();
-    batch.set(userDoc, { username: formValue, photoURL: user.photoURL, displayName: user.displayName });
-    batch.set(usernameDoc, { uid: user.uid });
+      const batch = firestore.batch();
+      batch.set(userDoc, {
+        username: formValue,
+        photoURL: user.photoURL,
+        displayName: user.displayName,
+      });
+      batch.set(usernameDoc, { uid: user.uid });
 
-    await batch.commit();
-  }
+      await batch.commit();
+    } catch {}
+  };
 
   const onChange = (e) => {
     const val = e.target.value.toLowerCase();
     const re = /^(?=[a-zA-Z0-9._]{3,15}$)(?!.*[_.]{2})[^_.].*[^_.]$/;
 
-    if (val.length < 3){
+    if (val.length < 3) {
       setFormValue(val);
       setLoading(false);
       setIsValid(false);
     }
 
-    if(re.test(val)){
+    if (re.test(val)) {
       setFormValue(val);
       setLoading(true);
       setIsValid(false);
@@ -90,7 +109,6 @@ function UsernameForm() {
       if (username.length >= 3) {
         const ref = firestore.doc(`usernames/${username}`);
         const { exists } = await ref.get();
-        console.log('Firestore read executed!');
         setIsValid(!exists);
         setLoading(false);
       }
@@ -103,20 +121,29 @@ function UsernameForm() {
       <section>
         <h3>Choose username</h3>
         <form onSubmit={onSubmit}>
-            <input name='username' placeholder='username' value={formValue} onChange={onChange} />
-            <UsernameMessage username={formValue} isValid={isValid} loading={loading} />
-            <button type='submit' className='btn-green' disabled={!isValid}>
-              Choose
-            </button>
+          <input
+            name="username"
+            placeholder="username"
+            value={formValue}
+            onChange={onChange}
+          />
+          <UsernameMessage
+            username={formValue}
+            isValid={isValid}
+            loading={loading}
+          />
+          <button type="submit" className="btn-green" disabled={!isValid}>
+            Choose
+          </button>
 
-            <h3>Debug state</h3>
-            <div>
-              Username: {formValue}
-              <br />
-              Loading: {loading.toString()}
-              <br />
-              Username valid: {isValid.toString()}
-            </div>
+          <h3>Debug state</h3>
+          <div>
+            Username: {formValue}
+            <br />
+            Loading: {loading.toString()}
+            <br />
+            Username valid: {isValid.toString()}
+          </div>
         </form>
       </section>
     )
